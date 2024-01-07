@@ -1,108 +1,35 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Client</title>
-</head>
-<body>
-    
-  <div>Доступные ключевые слова: cat, dog, bird</div>
-  <input id="keywordInput" type="text" placeholder="Enter keyword">
-  <button onclick="getUrls()">Get URLs</button>
-  <div id="urlsList"></div>
-
-  <script>
-    const socket = new WebSocket('ws://localhost:8080');
-
-    socket.onopen = function() {
-      console.log('Connected to server');
-    }
-
-    socket.onmessage = function(event) {
-      const urls = JSON.parse(event.data);
-      const urlsList = document.getElementById('urlsList');
-      urlsList.innerHTML = '';
-      if (urls === "empty") {
-        const link = document.createElement('div');
-        link.innerHTML = 'Не найдено ссылок по ключевому слову.';
-        urlsList.appendChild(link);
-        console.log('Не найдено ссылок по ключевому слову.');
-      } else {
-        urls.forEach((url) => {
-        const container = document.createElement('div');
-        container.style.marginBottom = '10px';
-
-        const link = document.createElement('a');
-        link.setAttribute('target', '_blank');
-        link.href = url;
-        link.innerHTML = url;
-        container.appendChild(link);
-
-        const progressBar = document.createElement('progress');
-        progressBar.value = 0;
-        progressBar.max = 100;
-        container.appendChild(progressBar);
-
-        const downloadButton = document.createElement('button');
-        downloadButton.innerHTML = 'Download content';
-        container.appendChild(downloadButton);
-
-        urlsList.appendChild(container);
-
-        downloadButton.addEventListener('click', function() {
-          downloadContent(url, progressBar);
-        });
-      });
-      }
-    };
-
-    socket.onclose = function(event) {
-      console.log('Disconnected from server');
-    };
-
-    function getUrls() {
-      const keyword = document.getElementById('keywordInput').value;
-      socket.send(keyword);
-    }
-
-    function downloadContent(url, progressBar) {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-
-        xhr.onloadstart = function() {
-            console.log('Download started');
-        };
-
-        xhr.onprogress = function(event) {
-            if (event.lengthComputable) {
-            const progress = (event.loaded / event.total) * 100;
-            progressBar.value = progress;
-            }
-        };
-
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-            const urlSegments = url.split('/');
-            const filename = urlSegments[urlSegments.length - 1];
-
-            const blob = new Blob([xhr.response]);
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename ? filename : 'downloaded_file';
-            link.click();
-            progressBar.value = 100;
-            } else {
-            console.log('Error occurred during download:', xhr.status);
-            }
-        };
-
-        xhr.onerror = function() {
-            console.log('Error occurred during download');
-        };
-
-        xhr.send();
-    }
-  </script>
-</body>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>"Путеводитель по городу"</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script src="https://api-maps.yandex.ru/2.1/?apikey=819ad9db-f94d-423f-8a39-283506896511&lang=ru_RU" type="text/javascript"></script>
+        <link href="style.css" rel="stylesheet">
+    </head>
+    <body>
+        <p class="text">Приложение поможет пользователям и туристам легко и удобно исследовать город.</p>
+        <p class="text-list">Функционал веб-приложения включает в себя следующие возможности:</p>
+        <ul class="unordered_list">
+            <li>Определение текущего местоположения пользователя и отображение на карте.</li>
+            <li>Возможность поиска ближайших достопримечательностей и интересных мест.</li>
+            <li>Расчет маршрута между выбранными точками.</li>
+            <li>Предоставление информации о достопримечательностях, ресторанах, магазинах и других интересных местах.</li>
+            <li>Возможность добавления отзывов и оценок.</li>
+            <li>Загрузка и отображение фотографий мест</li>
+            <li>Интеграция аудиогида с описанием и историей места при нахождении пользователя рядом с интересными объектами</li>
+            <li>Информация о предстоящих событиях и мероприятиях в городе.</li>
+            <li>Возможность добавления событий и создания собственного расписания.</li>
+            <li>Взаимодействие с удаленным сервером для получения актуальной информации о местах и событиях.</li>
+            <li>Использование LocalStorage для сохранения предпочтений пользователя и истории посещений.</li>
+        </ul>
+        
+        <div id="mapbox">
+            <div id="your_location">1</div>
+            <div id="map"></div>
+            <input type="button" id="destroyButton" value="Удалить карту"/>
+        </div>
+            
+        <script src="geolocation.js"></script>
+        
+    </body>
 </html>
